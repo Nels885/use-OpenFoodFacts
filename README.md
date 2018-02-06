@@ -7,16 +7,25 @@ This program was created for the company Pure Beurre to perform a food search in
 ### Dependencies
 
 * [Python 3.5 or more](https://www.python.org) is required.
-* [MySQL](https://www.mysql.com/fr/)
+* [PostGreSQL](https://www.postgresql.org/download/)
 
 ### Installation instructions
 
 * install Python 3.x
-* install MySQL
+* install PostgreSQL
 
 
     $ git clone https://github.com/Nels885/use-OpenFootFacts.git
+    $ cd use-OpenFoodFacts
 
+
+Create the database with the script found in the repo
+
+    script_create_DB.sql
+    
+Then run the python script below to retrieve the OpenFoodFacts data for embedding in the database.
+
+    $ python3 script.py
 
 ## How to use the program
 
