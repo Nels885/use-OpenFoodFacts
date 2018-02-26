@@ -1,62 +1,60 @@
+CREATE SEQUENCE store_id_seq;
 
-CREATE SEQUENCE public.store_id_seq;
-
-CREATE TABLE public.store (
-                id INTEGER NOT NULL DEFAULT nextval('public.store_id_seq'),
-                name VARCHAR(300),
-                CONSTRAINT store_pk PRIMARY KEY (id)
+CREATE TABLE store (
+                id INTEGER NOT NULL DEFAULT nextval('store_id_seq'),
+                name TEXT NOT NULL,
+                PRIMARY KEY(id)
 );
 
+CREATE UNIQUE INDEX store_idx ON store (name);
 
-ALTER SEQUENCE public.store_id_seq OWNED BY public.store.id;
 
-CREATE TABLE public.categorie (
-                id INTEGER NOT NULL,
-                name VARCHAR(300) NOT NULL,
-                CONSTRAINT categorie_pk PRIMARY KEY (id)
+CREATE SEQUENCE categorie_id_seq;
+
+CREATE TABLE categorie (
+                id INTEGER NOT NULL DEFAULT nextval('categorie_id_seq'),
+                name TEXT NOT NULL,
+                PRIMARY KEY(id)
 );
 
+CREATE UNIQUE INDEX categorie_idx ON categorie(name);
 
-CREATE TABLE public.product (
+
+CREATE SEQUENCE product_id_seq;
+
+CREATE TABLE product (
+                id INTEGER NOT NULL DEFAULT nextval('product_id_seq'),
+                product_name TEXT NOT NULL,
+                ingredient TEXT,
+                quantite TEXT,
+                nutrition_grade TEXT,
+                url TEXT,
+                PRIMARY KEY(id)
+);
+
+CREATE UNIQUE INDEX product_idx ON product(product_name);
+
+CREATE SEQUENCE backup_number_seq;
+
+CREATE TABLE backup (
+                number INTEGER NOT NULL DEFAULT nextval('backup_number_seq'),
                 product_id INTEGER NOT NULL,
-                ingredient VARCHAR(1000),
-                product_name VARCHAR(300) NOT NULL,
-                nutrition_grade VARCHAR(1) NOT NULL,
-                url VARCHAR(1000) NOT NULL,
+                PRIMARY KEY(number),
+                FOREIGN KEY(product_id) REFERENCES product(id)
+);
+
+CREATE TABLE assoc_product_categorie (
+                product_id INTEGER NOT NULL,
                 categorie_id INTEGER NOT NULL,
-                store_id INTEGER NOT NULL,
-                CONSTRAINT product_pk PRIMARY KEY (product_id)
+                PRIMARY KEY(product_id,categorie_id),
+                FOREIGN KEY(product_id) REFERENCES product(id),
+                FOREIGN KEY(categorie_id) REFERENCES categorie(id)
 );
 
-
-CREATE SEQUENCE public.backup_number_seq;
-
-CREATE TABLE public.backup (
-                number INTEGER NOT NULL DEFAULT nextval('public.backup_number_seq'),
+CREATE TABLE assoc_product_store (
                 product_id INTEGER NOT NULL,
-                CONSTRAINT backup_pk PRIMARY KEY (number)
+                store_id INTEGER NOT NULL,
+                PRIMARY KEY(product_id, store_id),
+                FOREIGN KEY(product_id) REFERENCES product(id),
+                FOREIGN KEY(store_id) REFERENCES store(id)
 );
-
-
-ALTER SEQUENCE public.backup_number_seq OWNED BY public.backup.number;
-
-ALTER TABLE public.product ADD CONSTRAINT store_product_fk
-FOREIGN KEY (store_id)
-REFERENCES public.store (id)
-ON DELETE NO ACTION
-ON UPDATE NO ACTION
-NOT DEFERRABLE;
-
-ALTER TABLE public.product ADD CONSTRAINT categorie_product_fk
-FOREIGN KEY (categorie_id)
-REFERENCES public.categorie (id)
-ON DELETE NO ACTION
-ON UPDATE NO ACTION
-NOT DEFERRABLE;
-
-ALTER TABLE public.backup ADD CONSTRAINT product_backup_fk
-FOREIGN KEY (product_id)
-REFERENCES public.product (product_id)
-ON DELETE NO ACTION
-ON UPDATE NO ACTION
-NOT DEFERRABLE;
