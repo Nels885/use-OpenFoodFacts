@@ -1,2 +1,4 @@
 .idea
 venv
+data/__*
+database_conf

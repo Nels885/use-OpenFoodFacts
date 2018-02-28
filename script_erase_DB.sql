@@ -1,10 +1,12 @@
-DELETE FROM product;
-DELETE FROM store;
-DELETE FROM categorie;
-DELETE FROM assoc_product_store;
+BEGIN TRANSACTION;
+
 DELETE FROM assoc_product_categorie;
+DELETE FROM product;
+DELETE FROM categorie;
 DELETE FROM backup;
-ALTER SEQUENCE product_id_seq RESTART WITH 1;
-ALTER SEQUENCE categorie_id_seq RESTART WITH 1;
-ALTER SEQUENCE store_id_seq RESTART WITH 1;
-ALTER SEQUENCE backup_number_seq RESTART WITH 1;
+
+SELECT setval('product_id_seq',1, false);
+SELECT setval('categorie_id_seq', 1, false);
+SELECT setval('backup_number_seq',1, false);
+
+COMMIT;

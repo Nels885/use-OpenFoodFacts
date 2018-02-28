@@ -1,14 +1,3 @@
-CREATE SEQUENCE store_id_seq;
-
-CREATE TABLE store (
-                id INTEGER NOT NULL DEFAULT nextval('store_id_seq'),
-                name TEXT NOT NULL,
-                PRIMARY KEY(id)
-);
-
-CREATE UNIQUE INDEX store_idx ON store (name);
-
-
 CREATE SEQUENCE categorie_id_seq;
 
 CREATE TABLE categorie (
@@ -16,8 +5,6 @@ CREATE TABLE categorie (
                 name TEXT NOT NULL,
                 PRIMARY KEY(id)
 );
-
-CREATE UNIQUE INDEX categorie_idx ON categorie(name);
 
 
 CREATE SEQUENCE product_id_seq;
@@ -29,10 +16,9 @@ CREATE TABLE product (
                 quantite TEXT,
                 nutrition_grade TEXT,
                 url TEXT,
+                stores TEXT,
                 PRIMARY KEY(id)
 );
-
-CREATE UNIQUE INDEX product_idx ON product(product_name);
 
 CREATE SEQUENCE backup_number_seq;
 
@@ -49,12 +35,4 @@ CREATE TABLE assoc_product_categorie (
                 PRIMARY KEY(product_id,categorie_id),
                 FOREIGN KEY(product_id) REFERENCES product(id),
                 FOREIGN KEY(categorie_id) REFERENCES categorie(id)
-);
-
-CREATE TABLE assoc_product_store (
-                product_id INTEGER NOT NULL,
-                store_id INTEGER NOT NULL,
-                PRIMARY KEY(product_id, store_id),
-                FOREIGN KEY(product_id) REFERENCES product(id),
-                FOREIGN KEY(store_id) REFERENCES store(id)
 );
