@@ -1,38 +1,16 @@
 #! /usr/bin/env python3
 # coding: utf-8
+"""
+Update database PostgreSQL with API OpenfoodFacts
+"""
 
 import requests
 import pickle
 import logging as log
 from getpass import getpass
 
-from data.sql import Sql
-
-converDb = {
-    'categories_tags': ['categorie', 'name'],
-    'product_name': ['product', 'product_name'],
-    'ingredients_text_with_allergens_fr': ['product', 'ingredient'],
-    'url': ['product', 'url'],
-    'nutrition_grades': ['product', 'nutrition_grade'],
-    'stores_tags': ['store', 'name']
-}
-
-infoRequest = {
-    'https': 'https://fr.openfoodfacts.org/cgi/search.pl?search_simple=1&action=process',
-    'action': 'process',
-    'tagtype_0': 'countries',
-    'tag_contains_0': 'contains',
-    'tag_0': 'france',
-    'sort_by': 'unique_scans_n',
-    'page_size': '20',
-    'json': '1'
-}
-
-categories = [
-    'Boissons gazeuses', 'Boissons chaudes', 'Boissons non sucrées', 'Laits', 'Yaourts', 'Fromages',
-    'Plats préparés', 'Céréales et pommes de terre', 'Biscuits et gateaux', 'Desserts', 'Confiseries',
-    'Légumes et dérivées'
-]
+from data.database import Database
+from data.glob import Glob
 
 
 def conf_database():
@@ -53,43 +31,49 @@ def conf_database():
 
 def data_create():
     cmdRequest = "{}&action={}&tagtype_0={}&tag_contains_0={}&tag_0={}&sort_by={}&page_size={}&json={}".format(
-        infoRequest['https'],
-        infoRequest['action'],
-        infoRequest['tagtype_0'],
-        infoRequest['tag_contains_0'],
-        infoRequest['tag_0'],
-        infoRequest['sort_by'],
-        infoRequest['page_size'],
-        infoRequest['json'])
+        Glob.infoApi['https'],
+        Glob.infoApi['action'],
+        Glob.infoApi['tagtype_0'],
+        Glob.infoApi['tag_contains_0'],
+        Glob.infoApi['tag_0'],
+        Glob.infoApi['sort_by'],
+        Glob.infoApi['page_size'],
+        Glob.infoApi['json'])
 
     info = ['product_name', 'ingredients_text_with_allergens_fr', 'quantity', 'nutrition_grades', 'url']
 
-    for categorie in categories:
+    for categorie in Glob.categories:
         r = requests.get("{}&tagtype_1=categories&tag_contains_1=contains&tag_1={}".format(cmdRequest, categorie))
         print("# Status Code: {} #".format(r.status_code))
         print("# Headers: {} #".format(r.headers['content-type']))
         print()
         result = r.json()['products']
-        insertCategorie = """INSERT INTO categorie(name) VALUES('%s') RETURNING id;""" % categorie
-        idCategorie = db.sql_insert_id(insertCategorie)
+        insertCategorie = """INSERT INTO categorie(name) VALUES('%s') RETURNING id;"""
+        idCategorie = db.insert_id(insertCategorie % categorie)
         for number in range(len(result) - 1):
             val = []
-            print("\n*** PRODUIT N°{} ***\n".format(str(number + 1)))
-            print(result[number]['product_name'])
+            log.info("*** PRODUIT N°%s CATEGORIE : '%s' ***\n", str(number + 1), categorie)
+            log.info("** Product_name : %s", result[number]['product_name'])
             for nb in range(len(info)):
                 try:
-                    val.append(result[number][info[nb]].replace("'", " "))
+                    case = result[number][info[nb]].strip()
+                    repVal = {"'": " ", '<span class="allergen">': '', '</span>': '', '\n': ' '}
+                    for key, value in repVal.items():
+                        case = case.replace(key, value)
+                    val.append(case)
                 except KeyError as err:
                     val.append("NULL")
-                    print("*** Valeur absente: {}".format(err))
+                    log.warning("*** Valeur absente: %s", err)
                 except AttributeError:
                     val.append("NULL")
             stores = ", ".join(result[number]['stores_tags'])
-            values = (val[0], val[1], val[2], val[3], val[4], stores)
-            print(values)
-            insertProduct = """INSERT INTO product(product_name,ingredient,quantite,nutrition_grade,url,stores) VALUES('%s','%s','%s','%s','%s','%s') RETURNING id;""" % values
-            idProduct = db.sql_insert_id(insertProduct)
-            db.sql_request("""INSERT INTO assoc_product_categorie VALUES('%s','%s');""" % (idProduct, idCategorie))
+            valProduct = (val[0], val[1], val[2], val[3], val[4], stores)
+            colProduct = "product_name,ingredient,quantite,nutrition_grade,url,stores"
+            log.info("%s\n", valProduct)
+            tableProduct = "product"
+            insertProduct = """INSERT INTO {}({}) VALUES('%s','%s','%s','%s','%s','%s') RETURNING id;""".format(tableProduct,colProduct)
+            idProduct = db.insert_id(insertProduct % valProduct)
+            db.execute("""INSERT INTO assoc_product_categorie VALUES('%s','%s');""" % (idProduct, idCategorie))
 
             # for sto in result[number]['stores_tags']:
             #     insertStore = """INSERT INTO store(name) VALUES('%s') ON CONFLICT (name) DO NOTHING;""" % sto
@@ -123,7 +107,7 @@ if __name__ == '__main__':
     try:
         while 1:
             choice, confSql = main()
-            db = Sql(log, confSql)
+            db = Database(log, confSql)
             if choice == "":
                 break
             elif choice == "1":
@@ -134,7 +118,7 @@ if __name__ == '__main__':
                 db.sql_script('script_erase_DB.sql')
             elif choice == "4":
                 data_create()
-            db.sql_close()
+            db.close()
     except KeyboardInterrupt:
         log.warning("Fermeture du programme avec Ctrl+C")
-        db.sql_close()
+        db.close()

@@ -1,24 +1,31 @@
 #! /usr/bin/env python3
 # coding: utf-8
+"""
 
+"""
+import os
 import pickle
 import logging as log
 
-from data.sql import Sql
+from random import randint
+
+from data.database import Database
 
 
 def list_categories():
-    categories = db.sql_select("""SELECT * FROM categorie;""")
+    categories = db.select("""SELECT * FROM categorie;""")
     while 1:
         print("\nListes des catégories:")
-        number = []
+        nb = 0
+        numbers = []
         for cat in categories:
-            number.append(str(cat[0]))
-            print(" {} - {}".format(cat[0], cat[1]))
-        categorieId = input("Entrez le numéro de votre choix ( ou <Enter> pour quitter) : ")
-        if categorieId in number:
+            nb += 1
+            numbers.append(str(nb))
+            print(" {} - {}".format(len(numbers), cat[1]))
+        categorieId = input("Entrez le numéro de votre choix : ")
+        if categorieId in numbers:
             break
-    return categorieId
+    return categories[int(categorieId) - 1]
 
 
 def list_products(categorieId):
@@ -35,17 +42,19 @@ def list_products(categorieId):
                     WHERE
                           p.id=a.product_id AND c.id=a.categorie_id AND c.id='%s';
                     """
-    products = db.sql_select(searchProduct % categorieId)
+    products = db.select(searchProduct % categorieId[0])
     while 1:
         print("\nListes des produits:")
-        number = []
+        nb = 0
+        numbers = []
         for prod in products:
-            number.append(str(prod[0]))
-            print(" {} - {}".format(prod[0], prod[1]))
-        productId = input("Entrez le numéro de votre choix ( ou <Enter> pour quitter) : ")
-        if productId in number:
+            nb += 1
+            numbers.append(str(nb))
+            print(" {} - {}".format(nb, prod[1]))
+        productId = input("Entrez le numéro de votre choix : ")
+        if productId in numbers:
             break
-    return products[int(productId)]
+    return products[int(productId) - 1]
 
 
 def surrogate_products(product):
@@ -62,9 +71,20 @@ def surrogate_products(product):
                         WHERE
                             p.id=a.product_id AND c.id=a.categorie_id AND c.name='%s' AND p.nutrition_grade='%s';
                         """
-    surrogate = db.sql_select(surrogateProduct % (product[3], product[2]))
-    for info in surrogate:
-        print(info)
+    surrogate = db.select(surrogateProduct % (product[3], product[2]))
+    nb = randint(0, len(surrogate) - 1)
+    os.system("clear")
+    print(
+        "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n"
+        " Proposition de produit de substitution pour '{}':\n"
+        "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n"
+        " * Nom : {}\n"
+        " * Ingredients : {}\n"
+        " * URL OpenFoodfacts : {}\n"
+        " * Magasins : {}\n"
+        .format(product[1], surrogate[nb][0], surrogate[nb][1], surrogate[nb][2], surrogate[nb][3])
+    )
+    input("Appuyez sur une touche pour revenir au menu principal... ")
 
 
 def list_backup():
@@ -72,7 +92,8 @@ def list_backup():
 
 
 def main():
-    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+    os.system("clear")
+    print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
           "~~       Recherche de produit          ~~\n"
           "~~            Pure Beurre              ~~\n"
           "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
@@ -90,16 +111,16 @@ if __name__ == '__main__':
         confDatabase = pickle.load(open('database_conf', 'rb'))
         while 1:
             choice = main()
-            db = Sql(log, confDatabase)
+            db = Database(log, confDatabase)
             if choice == "":
                 break
             elif choice == "1":
                 surrogate_products(list_products(list_categories()))
             elif choice == "2":
                 list_backup()
-            db.sql_close()
+            db.close()
     except KeyboardInterrupt:
         log.warning("Fermeture du programme avec Ctrl+C")
-        db.sql_close()
+        db.close()
     except FileNotFoundError:
         log.error("Manque fichier 'database_conf' voyez lancer le script 'update_db.py'")
