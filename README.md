@@ -1,6 +1,6 @@
-# use-OpenFootFacts
+# use-OpenFoodFacts
 
-This program was created for the company Pure Beurre to perform a food search in the Open Food Facts database to find an equivalent.
+This program was created for the company Pure Beurre to perform a food search in the OpenFoodFacts database to find an equivalent.
 
 ## Start guide
 
@@ -14,18 +14,29 @@ This program was created for the company Pure Beurre to perform a food search in
 * install Python 3.x
 * install PostgreSQL
 
+Create a database and a proprietary user account for this database.
+
+Collect the use-OpenFoodFacts repo and install the dependencies as below:
 
     $ git clone https://github.com/Nels885/use-OpenFootFacts.git
     $ cd use-OpenFoodFacts
+    $ pip3 install -r requirements.txt
 
 
-Create the database with the script found in the repo
-
-    script_create_DB.sql
-    
 Then run the python script below to retrieve the OpenFoodFacts data for embedding in the database.
 
-    $ python3 script.py
+    $ python3 update_db.py
+
+At the first launch it is necessary to indicate the information for the connection to the database
+
+* database name
+* user
+* password
+* used port
+* address database
+
+
+
 
 ## How to use the program
 

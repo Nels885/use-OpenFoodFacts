@@ -12,20 +12,20 @@ CREATE SEQUENCE product_id_seq;
 CREATE TABLE product (
                 id INTEGER NOT NULL DEFAULT nextval('product_id_seq'),
                 product_name TEXT NOT NULL,
-                ingredient TEXT,
                 quantite TEXT,
+                ingredient TEXT,
                 nutrition_grade TEXT,
                 url TEXT,
                 stores TEXT,
                 PRIMARY KEY(id)
 );
 
-CREATE SEQUENCE backup_number_seq;
+CREATE SEQUENCE backup_id_seq;
 
 CREATE TABLE backup (
-                number INTEGER NOT NULL DEFAULT nextval('backup_number_seq'),
+                id INTEGER NOT NULL DEFAULT nextval('backup_id_seq'),
                 product_id INTEGER NOT NULL,
-                PRIMARY KEY(number),
+                PRIMARY KEY(id),
                 FOREIGN KEY(product_id) REFERENCES product(id)
 );
 

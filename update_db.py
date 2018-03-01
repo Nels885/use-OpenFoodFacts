@@ -4,13 +4,25 @@
 Update database PostgreSQL with API OpenfoodFacts
 """
 
-import requests
 import pickle
 import logging as log
 from getpass import getpass
+import argparse
 
 from data.database import Database
 from data.glob import Glob
+from data.apirest import Apirest
+
+
+def parse_arguments():
+    """
+    Arguments added to command line to get
+    additional information
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-v", "--verbose", action='store_true', help="""Display informations of use-OpenFoodFacts""")
+    parser.add_argument("-d", "--debug", action='store_true', help="""Switch to debug mode!""")
+    return parser.parse_args()
 
 
 def conf_database():
@@ -30,24 +42,11 @@ def conf_database():
 
 
 def data_create():
-    cmdRequest = "{}&action={}&tagtype_0={}&tag_contains_0={}&tag_0={}&sort_by={}&page_size={}&json={}".format(
-        Glob.infoApi['https'],
-        Glob.infoApi['action'],
-        Glob.infoApi['tagtype_0'],
-        Glob.infoApi['tag_contains_0'],
-        Glob.infoApi['tag_0'],
-        Glob.infoApi['sort_by'],
-        Glob.infoApi['page_size'],
-        Glob.infoApi['json'])
-
+    api = Apirest(log)
     info = ['product_name', 'ingredients_text_with_allergens_fr', 'quantity', 'nutrition_grades', 'url']
 
     for categorie in Glob.categories:
-        r = requests.get("{}&tagtype_1=categories&tag_contains_1=contains&tag_1={}".format(cmdRequest, categorie))
-        print("# Status Code: {} #".format(r.status_code))
-        print("# Headers: {} #".format(r.headers['content-type']))
-        print()
-        result = r.json()['products']
+        result = api.get_request(categorie)
         insertCategorie = """INSERT INTO categorie(name) VALUES('%s') RETURNING id;"""
         idCategorie = db.insert_id(insertCategorie % categorie)
         for number in range(len(result) - 1):
@@ -57,7 +56,7 @@ def data_create():
             for nb in range(len(info)):
                 try:
                     case = result[number][info[nb]].strip()
-                    repVal = {"'": " ", '<span class="allergen">': '', '</span>': '', '\n': ' '}
+                    repVal = {"'": " ", '<span class="allergen">': '', '</span>': '', '\r': ' '}
                     for key, value in repVal.items():
                         case = case.replace(key, value)
                     val.append(case)
@@ -90,7 +89,7 @@ def main():
           "~~            Pure Beurre              ~~\n"
           "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     try:
-        confDatabase = pickle.load(open('database_conf', 'rb'))
+        confDatabase = pickle.load(open(Glob.confDbFile, 'rb'))
     except FileNotFoundError:
         confDatabase = conf_database()
     print("\nListes des options:\n"
@@ -103,7 +102,11 @@ def main():
 
 
 if __name__ == '__main__':
-    log.basicConfig(level=log.INFO)
+    args = parse_arguments()
+    if args.debug:
+        log.basicConfig(level=log.DEBUG)
+    elif args.verbose:
+        log.basicConfig(level=log.INFO)
     try:
         while 1:
             choice, confSql = main()

@@ -7,6 +7,6 @@ DELETE FROM backup;
 
 SELECT setval('product_id_seq',1, false);
 SELECT setval('categorie_id_seq', 1, false);
-SELECT setval('backup_number_seq',1, false);
+SELECT setval('backup_id_seq',1, false);
 
 COMMIT;

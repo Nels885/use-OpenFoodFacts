@@ -1,5 +1,5 @@
 """
-Database Management module
+Database management module
 """
 
 import psycopg2
