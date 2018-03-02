@@ -1,12 +1,23 @@
 """
-Variables Globales
+Global variables module
 """
 
 
 class Glob:
+    """
+    List of variables used by different Python script
+    """
 
+    # Path for the configuration file
     confDbFile = 'data/database_conf'
 
+    # Constants for SQL requests
+    reqSelect = """SELECT %s FROM %s;"""
+    reqCondition = """SELECT %s FROM %s WHERE %s %s;"""
+    tabAssocCat = "product AS p, assoc_product_categorie AS a, categorie AS c"
+    condAssocCat = "p.id=a.product_id AND c.id=a.categorie_id"
+
+    # Information for the OpenFoodFacts API
     infoApi = {
         'https': 'https://fr.openfoodfacts.org/cgi/search.pl?search_simple=1&action=process',
         'action': 'process',
@@ -20,12 +31,14 @@ class Glob:
         'tag_contains_1': 'contains'
     }
 
+    # List of categories for the database
     categories = [
         'Boissons gazeuses', 'Boissons chaudes', 'Boissons non sucrées', 'Laits', 'Yaourts', 'Fromages',
         'Plats préparés', 'Céréales et pommes de terre', 'Biscuits et gateaux', 'Desserts', 'Confiseries',
-        'Légumes et dérivées'
+        'Légumes et dérivés'
     ]
 
+    # Not used
     converDb = {
         'product': {
             'product_name': 'product_name',
