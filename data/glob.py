@@ -22,7 +22,7 @@ class Glob:
         'https': 'https://fr.openfoodfacts.org/cgi/search.pl?search_simple=1&action=process',
         'action': 'process',
         'sort_by': 'unique_scans_n',
-        'page_size': '20',
+        'page_size': '100',
         'json': '1',
         'tagtype_0': 'countries',
         'tag_contains_0': 'contains',
@@ -31,24 +31,27 @@ class Glob:
         'tag_contains_1': 'contains'
     }
 
-    # List of categories for the database
-    categories = [
-        'Boissons gazeuses', 'Boissons chaudes', 'Boissons non sucrées', 'Laits', 'Yaourts', 'Fromages',
-        'Plats préparés', 'Céréales et pommes de terre', 'Biscuits et gateaux', 'Desserts', 'Confiseries',
-        'Légumes et dérivés'
-    ]
-
-    # Not used
+    # Parameters for inserting data into the database
     converDb = {
-        'product': {
-            'product_name': 'product_name',
-            'quantite': 'qauntity',
-            'ingredient': 'ingredients_text_with_allergens_fr',
-            'nutrition_grade': 'nutrition_grades',
-            'url': 'url',
-            'stores': 'stores_tags'
-        },
-        'categorie': {
-            'name': 'categories_tags'
-        }
+        'product': [
+            ('product_name', 'product_name'),
+            ('quantite', 'quantity'),
+            ('ingredient', 'ingredients_text_with_allergens_fr'),
+            ('nutrition_grade', 'nutrition_grades'),
+            ('url', 'url'),
+            ('stores', 'stores_tags')
+        ],
+        'categorie': (
+            'Boissons gazeuses', 'Boissons chaudes', 'Boissons non sucrées', 'Laits', 'Yaourts', 'Fromages',
+            'Plats préparés', 'Céréales et pommes de terre', 'Biscuits et gateaux', 'Desserts', 'Confiseries',
+            'Légumes et dérivés'
+        ),
+        'assoc_product_categorie': (
+            'product_id',
+            'categorie_id'
+        ),
+        'backup': (
+            'id',
+            'product'
+        )
     }

@@ -31,7 +31,7 @@ def header(msg="\n"):
     os.system("clear")
     print("\n   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
           "   ~~~           Mise à jour Base de données           ~~~\n"
-          "   ~~~         pour l'application  Pure Beurre         ~~~\n"
+          "   ~~~         pour l'application Pure Beurre          ~~~\n"
           "   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print(msg)
 
@@ -42,26 +42,19 @@ def conf_database(msg="\n"):
     allow you to connect to the database
         :return: dict of the parameters of the database
     """
-    while True:
-        header(msg)
-        print("Information de connection pour la base de données")
-        dbname = input("  - Nom de la base de données : ")
-        user = input("  - Compte propriétaire : ")
-        password = getpass("  - Password du compte : ")
-        port = str(input("  - port (5432 par défaut) : "))
-        if port == "":
-            port = "5432"
-        host = input("  - Adresse base de données ('localhost' par défaut) : ")
-        if host == "":
-            host = "localhost"
-        confDb = {'dbname': dbname, 'user': user, 'password': password, 'port': port, 'host': host}
-        pickle.dump(confDb, open(Glob.confDbFile, 'wb'))
-        testDb = Database(log, confDb)
-        if not testDb.error:
-            break
-        else:
-            print("\n*** Erreur information de connection base de données ***\n")
-            input("Appuyez sur une touche pour modifier les paramètres... ")
+    header(msg)
+    print("Information de connection pour la base de données")
+    dbname = input("  - Nom de la base de données : ")
+    user = input("  - Compte propriétaire : ")
+    password = getpass("  - Password du compte : ")
+    port = str(input("  - port (5432 par défaut) : "))
+    if port == "":
+        port = "5432"
+    host = input("  - Adresse base de données ('localhost' par défaut) : ")
+    if host == "":
+        host = "localhost"
+    confDb = {'dbname': dbname, 'user': user, 'password': password, 'port': port, 'host': host}
+    pickle.dump(confDb, open(Glob.confDbFile, 'wb'))
 
     print("\n## Ajout paramètres de la base de données terminée ##\n")
 
@@ -73,36 +66,37 @@ def data_create():
         :return: Adding values in the different tables of the database
     """
     api = Apirest(log)
-    info = ['product_name', 'ingredients_text_with_allergens_fr', 'quantity', 'nutrition_grades', 'url']
+    col = []
+    dataOffName = []
+    for colDb, name in Glob.converDb['product']:
+        if name is not None:
+            dataOffName.append(name)
+        col.append(colDb)
+    colProduct = ",".join(col)
+    log.info("Colonnes : %s\n"
+             "Valeurs  : %s" % (colProduct, dataOffName))
+    for categorie in Glob.converDb['categorie']:
+        idCategorie = db.insert("categorie", [categorie], "name", True)
+        results = api.get_request(categorie)
+        for nbProduct in range(len(results) - 1):
+            result = results[nbProduct]
+            valProduct = api.convert_data(result, dataOffName)
 
-    for categorie in Glob.categories:
-        result = api.get_request(categorie)
-        insertCategorie = """INSERT INTO categorie(name) VALUES('%s') RETURNING id;"""
-        idCategorie = db.insert_id(insertCategorie % categorie)
-        for number in range(len(result) - 1):
-            val = []
-            log.info("*** PRODUIT N°%s CATEGORIE : '%s' ***\n", str(number + 1), categorie)
-            log.info("** Product_name : %s", result[number]['product_name'])
-            for nb in range(len(info)):
-                try:
-                    case = result[number][info[nb]].strip()
-                    repVal = {"'": " ", '<span class="allergen">': '', '</span>': '', '\r': ' '}
-                    for key, value in repVal.items():
-                        case = case.replace(key, value)
-                    val.append(case)
-                except KeyError as err:
-                    val.append("NULL")
-                    log.warning("*** Valeur absente: %s", err)
-                except AttributeError:
-                    val.append("NULL")
-            stores = ", ".join(result[number]['stores_tags'])
-            valProduct = (val[0], val[1], val[2], val[3], val[4], stores)
-            colProduct = "product_name,ingredient,quantite,nutrition_grade,url,stores"
-            log.info("%s\n", valProduct)
+            # Product information with verbose option
+            log.info("*** PRODUIT N°%s CATEGORIE : '%s' ***\n"
+                     "Product_name : %s\n", str(nbProduct + 1), categorie, result['product_name'])
+            log.debug("Valeurs du produit : %s\n", valProduct)
+
             tableProduct = "product"
-            insertProduct = """INSERT INTO {}({}) VALUES('%s','%s','%s','%s','%s','%s') RETURNING id;""".format(tableProduct,colProduct)
-            idProduct = db.insert_id(insertProduct % valProduct)
-            db.execute("""INSERT INTO assoc_product_categorie VALUES('%s','%s');""" % (idProduct, idCategorie))
+            condition = " product_name=%s"
+            listId = db.select("id", tableProduct, condition, [result['product_name']], True)
+            if len(listId) == 0:
+                idProduct = db.insert(tableProduct, valProduct, colProduct, True)
+            else:
+                idProduct = listId[0][0]
+                log.warning("*** Produit '%s' existe avec l'ID : %s ***" % (result['product_name'], idProduct))
+            db.insert("assoc_product_categorie", [idProduct, idCategorie])
+
     print("\n## Insertion des données dans la base terminée ##\n")
 
 
@@ -134,11 +128,11 @@ if __name__ == '__main__':
         try:
             confDb = pickle.load(open(Glob.confDbFile, 'rb'))
             db = Database(log, confDb)
-            choice = main()
-            if choice == "":
-                break
             if not db.error:
-                if choice == "1":
+                choice = main()
+                if choice == "":
+                    break
+                elif choice == "1":
                     conf_database()
                 elif choice == "2":
                     header("\n## Creation de la base de données ##\n")
