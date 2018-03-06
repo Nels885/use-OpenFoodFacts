@@ -44,9 +44,12 @@ def list_categories():
     the user for input a number.
         :return: returns the number that the user has chosen
     """
+
+    # list of categories of the categorie table
     cols = "*"
     tabCat = "categorie"
     categories = db.select(cols, tabCat)
+
     while 1:
         header()
         print("\nListes des catégories:")
@@ -70,10 +73,13 @@ def list_products(infoCategory):
         :return: returns the number that the user has chosen
     """
     catId, catName = infoCategory
+    values = [catId]
+
+    # list of products of the selected category using the association table "assoc_product_category"
     cols = "p.id,p.product_name,p.nutrition_grade,c.name"
     condition = Glob.condAssocCat + " AND c.id=%s"
-    values = [catId]
     products = db.select(cols, Glob.tabAssocCat, condition, True, values)
+
     while 1:
         header()
         print("\nListes des produits de la Catégorie '{}' :".format(catName))
@@ -89,7 +95,7 @@ def list_products(infoCategory):
     return products[int(selectId) - 1]
 
 
-def surrogate_products(product):
+def substitute_products(product):
     """
     Displays the description of the substitution
     product selected by the user
@@ -97,14 +103,17 @@ def surrogate_products(product):
         :return: Displays in the console the product information
     """
     prodId, prodName, prodGrade, catName = product
+    values = [catName, prodGrade]
+
+    # list of substitute products
     cols = "p.id,p.product_name,p.quantite,p.ingredient,p.url,p.stores"
     condition = Glob.condAssocCat + " AND c.name=%s AND p.nutrition_grade=%s"
-    values = [catName, prodGrade]
-    surrogate = db.select(cols, Glob.tabAssocCat, condition, True, values)
-    nb = randint(0, len(surrogate) - 1)
-    subBackup = [surrogate[nb][0], prodName]
+    subProducts = db.select(cols, Glob.tabAssocCat, condition, True, values)
+
+    nb = randint(0, len(subProducts) - 1)
+    subBackup = [subProducts[nb][0], prodName]
     while 1:
-        desc_product(surrogate[nb][1:], prodName)
+        desc_product(subProducts[nb][1:], prodName)
         print("Listes des options:\n"
               "  1 - Enregistrez cet aliment de substitution ?\n"
               "  2 - Pour retournez au menu principale\n")
@@ -149,15 +158,40 @@ def list_backup(subBackup=None):
                 break
             elif selectId in numbers:
                 backup = backups[int(selectId) - 1]
-                print(backup)
                 desc_product(backup[3:], backup[1])
                 input("Appuyez sur une touche pour revenir au menu principal... ")
                 break
     else:
         log.info("Info backup : %s", subBackup)
         db.insert("backup", subBackup, "product_id,substituted_product")
-        print("\n## Enregistrement du produit de substitution termné ##\n")
+        print("\n## Enregistrement du produit de substitution terminé ##\n")
         input("Appuyez sur une touche pour revenir au menu principal... ")
+
+
+def del_backup():
+    cols = "b.id,b.substituted_product,p.id,p.product_name,p.quantite,p.ingredient,p.url,p.stores"
+    condition = Glob.condBackProd
+    backups = db.select(cols, Glob.tabBackProd, condition, True)
+    while 1:
+        header()
+        numbers = []
+        print("\nListes des produits substitués :")
+        for back in backups:
+            numbers.append(str(back[0]))
+            print("  {} - '{}' substitut de : '{}'".format(back[0], back[3], back[1]))
+        print("\nListes des options:\n"
+              "  - Choisir le numéro du produit à retirer\n"
+              "  - Taper 'all' pour retirer tout les produits\n"
+              "  - La touche <Enter> pour le menu principal\n")
+        selectId = input("Entrez votre choix : ")
+        if selectId == "":
+            break
+        elif selectId == "all":
+            cmd = "DELETE FROM backup; SELECT setval('backup_id_seq',1, false);"
+            db._execute(cmd)
+            print("\n## Tout les produits enregistrés sont retirés de la base ##\n")
+            input("Appuyez sur une touche pour revenir au menu principal... ")
+            break
 
 
 def main():
@@ -167,7 +201,8 @@ def main():
     """
     print("\nListes des options:\n"
           "  1 - Quel aliment souhaitez-vous remplacer ?\n"
-          "  2 - retrouvez mes aliments substitués\n")
+          "  2 - Retrouvez mes aliments substitués\n"
+          "  3 - Supprimez un aliments substitués\n")
     entry = input("Entrez le numéro de votre choix ( ou <Enter> pour quitter) : ")
     return entry
 
@@ -191,9 +226,11 @@ if __name__ == '__main__':
                 if choice == "":
                     break
                 elif choice == "1":
-                    surrogate_products(list_products(list_categories()))
+                    substitute_products(list_products(list_categories()))
                 elif choice == "2":
                     list_backup()
+                elif choice == "3":
+                    del_backup()
                 db.close()
             else:
                 print("\n*** Erreur information de connection base de données ***\n")
