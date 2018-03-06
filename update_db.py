@@ -27,16 +27,21 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def header(msg="\n"):
+def header(msg=""):
+    """
+    Header of program
+        :param msg: Show the menu name or detected errors
+        :return: Show the program header
+    """
     os.system("clear")
     print("\n   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
           "   ~~~           Mise à jour Base de données           ~~~\n"
           "   ~~~         pour l'application Pure Beurre          ~~~\n"
-          "   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+          "   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
     print(msg)
 
 
-def conf_database(msg="\n"):
+def conf_database(msg=""):
     """
     Adding the parameters in the 'database_conf' file that
     allow you to connect to the database
@@ -89,7 +94,7 @@ def data_create():
 
             tableProduct = "product"
             condition = " product_name=%s"
-            listId = db.select("id", tableProduct, condition, [result['product_name']], True)
+            listId = db.select("id", tableProduct, condition, True, [result['product_name']])
             if len(listId) == 0:
                 idProduct = db.insert(tableProduct, valProduct, colProduct, True)
             else:
@@ -135,18 +140,18 @@ if __name__ == '__main__':
                 elif choice == "1":
                     conf_database()
                 elif choice == "2":
-                    header("\n## Creation de la base de données ##\n")
+                    header("## Creation de la base de données ##\n")
                     db.sql_script('script_create_DB.sql')
                 elif choice == "3":
-                    header("\n## Suppression des données dans la base ##\n")
+                    header("## Suppression des données dans la base ##\n")
                     db.sql_script('script_erase_DB.sql')
                 elif choice == "4":
-                    header("\n## Insertion des données dans la base en cours... ##\n")
+                    header("## Insertion des données dans la base en cours... ##\n")
                     data_create()
                 else:
                     print("\n*** Erreur de touche ***\n")
             else:
-                conf_database("\n*** Erreur information de connection Base de données ***\n")
+                conf_database("*** Erreur information de connection Base de données ***\n")
             input("Appuyez sur une touche pour revenir au menu principal... ")
             db.close()
         except FileNotFoundError:

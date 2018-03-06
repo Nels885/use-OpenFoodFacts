@@ -25,6 +25,7 @@ CREATE SEQUENCE backup_id_seq;
 CREATE TABLE backup (
                 id INTEGER NOT NULL DEFAULT nextval('backup_id_seq'),
                 product_id INTEGER NOT NULL,
+                substituted_product TEXT,
                 PRIMARY KEY(id),
                 FOREIGN KEY(product_id) REFERENCES product(id)
 );

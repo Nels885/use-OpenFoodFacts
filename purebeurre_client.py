@@ -71,10 +71,9 @@ def list_products(infoCategory):
     """
     catId, catName = infoCategory
     cols = "p.id,p.product_name,p.nutrition_grade,c.name"
-    searchProduct = " AND c.id=%s"
-    condition = Glob.condAssocCat + searchProduct
+    condition = Glob.condAssocCat + " AND c.id=%s"
     values = [catId]
-    products = db.select(cols, Glob.tabAssocCat, condition, values, True)
+    products = db.select(cols, Glob.tabAssocCat, condition, True, values)
     while 1:
         header()
         print("\nListes des produits de la Catégorie '{}' :".format(catName))
@@ -98,13 +97,27 @@ def surrogate_products(product):
         :return: Displays in the console the product information
     """
     prodId, prodName, prodGrade, catName = product
-    cols = "p.product_name,p.quantite,p.ingredient,p.url,p.stores"
-    surrogateCondition = " AND c.name=%s AND p.nutrition_grade=%s"
-    condition = Glob.condAssocCat + surrogateCondition
+    cols = "p.id,p.product_name,p.quantite,p.ingredient,p.url,p.stores"
+    condition = Glob.condAssocCat + " AND c.name=%s AND p.nutrition_grade=%s"
     values = [catName, prodGrade]
-    surrogate = db.select(cols, Glob.tabAssocCat, condition, values, True)
+    surrogate = db.select(cols, Glob.tabAssocCat, condition, True, values)
     nb = randint(0, len(surrogate) - 1)
-    name, quantity, ingredients, url, stores = surrogate[nb]
+    subBackup = [surrogate[nb][0], prodName]
+    while 1:
+        desc_product(surrogate[nb][1:], prodName)
+        print("Listes des options:\n"
+              "  1 - Enregistrez cet aliment de substitution ?\n"
+              "  2 - Pour retournez au menu principale\n")
+        entry = input("Entrez le numéro de votre choix : ")
+        if entry == "1":
+            list_backup(subBackup)
+            break
+        elif entry == "2":
+            break
+
+
+def desc_product(infoSub, subName):
+    name, quantity, ingredients, url, stores = infoSub
     os.system("clear")
     print(
         "\n##########################################################################\n\n"
@@ -115,13 +128,36 @@ def surrogate_products(product):
         " * Ingredients : {}\n"
         " * URL OpenFoodfacts : {}\n"
         " * Magasins : {}\n"
-        .format(prodName, name, quantity, ingredients, url, stores)
+        .format(subName, name, quantity, ingredients, url, stores)
     )
-    input("Appuyez sur une touche pour revenir au menu principal... ")
 
 
-def list_backup():
-    pass
+def list_backup(subBackup=None):
+    if subBackup is None:
+        cols = "b.id,b.substituted_product,p.id,p.product_name,p.quantite,p.ingredient,p.url,p.stores"
+        condition = Glob.condBackProd
+        backups = db.select(cols, Glob.tabBackProd, condition, True)
+        while 1:
+            header()
+            numbers = []
+            print("\nListes des produits substitués :")
+            for back in backups:
+                numbers.append(str(back[0]))
+                print("  {} - '{}' substitut de : '{}'".format(back[0], back[3], back[1]))
+            selectId = input("\nEntrez le numéro de votre choix ou <Enter> pour le menu principal : ")
+            if selectId == "":
+                break
+            elif selectId in numbers:
+                backup = backups[int(selectId) - 1]
+                print(backup)
+                desc_product(backup[3:], backup[1])
+                input("Appuyez sur une touche pour revenir au menu principal... ")
+                break
+    else:
+        log.info("Info backup : %s", subBackup)
+        db.insert("backup", subBackup, "product_id,substituted_product")
+        print("\n## Enregistrement du produit de substitution termné ##\n")
+        input("Appuyez sur une touche pour revenir au menu principal... ")
 
 
 def main():

@@ -53,7 +53,7 @@ class Database:
         idLine = self.__return_id(req, param, returnId)
         return idLine
 
-    def select(self, columns, tables, cond=None, param=None, condition=False):
+    def select(self, columns, tables, cond=None, condition=False, param=None):
         """
         ## Select Method used by 'purebeurre_client.py' program##
             :param columns: the colomns to display
