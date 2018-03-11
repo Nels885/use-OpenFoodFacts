@@ -47,7 +47,7 @@ def list_categories():
 
     # list of categories of the categorie table
     cols = "*"
-    tabCat = "categorie"
+    tabCat = "categorie ORDER BY name"
     categories = db.select(cols, tabCat)
 
     while 1:
@@ -77,7 +77,7 @@ def list_products(infoCategory):
 
     # list of products of the selected category using the association table "assoc_product_category"
     cols = "p.id,p.product_name,p.nutrition_grade,c.name"
-    condition = Glob.condAssocCat + " AND c.id=%s"
+    condition = Glob.condAssocCat + " AND c.id=%s ORDER BY p.product_name"
     products = db.select(cols, Glob.tabAssocCat, condition, True, values)
 
     while 1:

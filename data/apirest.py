@@ -64,7 +64,7 @@ class Apirest:
                     case = ", ".join(case)
             except KeyError as err:
                 case = "NULL"
-                self.log.warning("*** Valeur absente dans OFF: %s", err)
+                self.log.info("*** Valeur absente dans OFF: %s", err)
             valProduct.append(case)
         return valProduct
 

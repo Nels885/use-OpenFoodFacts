@@ -99,6 +99,8 @@ class Database:
         """
         try:
             self.curs.execute(request, param)
+        except psycopg2.ProgrammingError:
+            self.log.warning("*** La base de données existe déjà ***\n")
         except Exception as err:
             self.log.debug("### Requêtes SQL incorrecte : %s\n"
                              "Erreur : %s ###" % (request, err))

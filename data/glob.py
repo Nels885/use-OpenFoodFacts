@@ -9,7 +9,7 @@ class Glob:
     """
 
     # Path for the configuration file
-    confDbFile = 'data/database_conf'
+    confDbFile = 'database_conf'
 
     # Constants for SQL requests
     reqSelect = """SELECT %s FROM %s;"""

@@ -73,6 +73,7 @@ def data_create():
     api = Apirest(log)
     col = []
     dataOffName = []
+    tableProduct = "product"
     for colDb, name in Glob.converDb['product']:
         if name is not None:
             dataOffName.append(name)
@@ -80,6 +81,9 @@ def data_create():
     colProduct = ",".join(col)
     log.info("Colonnes : %s\n"
              "Valeurs  : %s" % (colProduct, dataOffName))
+
+    nbLineBefore = db.select("count(*)", tableProduct)[0][0]
+
     for categorie in Glob.converDb['categorie']:
         idCategorie = db.insert("categorie", [categorie], "name", True)
         results = api.get_request(categorie)
@@ -92,17 +96,18 @@ def data_create():
                      "Product_name : %s\n", str(nbProduct + 1), categorie, result['product_name'])
             log.debug("Valeurs du produit : %s\n", valProduct)
 
-            tableProduct = "product"
             condition = " product_name=%s"
             listId = db.select("id", tableProduct, condition, True, [result['product_name']])
             if len(listId) == 0:
                 idProduct = db.insert(tableProduct, valProduct, colProduct, True)
             else:
                 idProduct = listId[0][0]
-                log.warning("*** Produit '%s' existe avec l'ID : %s ***" % (result['product_name'], idProduct))
+                log.info("*** Produit '%s' existe avec l'ID : %s ***" % (result['product_name'], idProduct))
             db.insert("assoc_product_categorie", [idProduct, idCategorie])
 
-    print("\n## Insertion des données dans la base terminée ##\n")
+    nbLineAfter = db.select("count(*)", tableProduct)[0][0]
+    print("  - {} produits ajoutés\n"
+          "\n## Insertion des données dans la base terminée ##\n".format(nbLineAfter - nbLineBefore))
 
 
 def main():
@@ -146,7 +151,7 @@ if __name__ == '__main__':
                     header("## Suppression des données dans la base ##\n")
                     db.sql_script('script_erase_DB.sql')
                 elif choice == "4":
-                    header("## Insertion des données dans la base en cours... ##\n")
+                    header("# Insertion des données dans la base en cours... #\n")
                     data_create()
                 else:
                     print("\n*** Erreur de touche ***\n")
