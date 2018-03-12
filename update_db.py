@@ -10,9 +10,9 @@ import logging as log
 from getpass import getpass
 import argparse
 
-from data.database import Database
-from data.glob import Glob
-from data.apirest import Apirest
+from package.database import Database
+from package.glob import Glob
+from package.apirest import Apirest
 
 
 def parse_arguments():
@@ -73,8 +73,9 @@ def data_create():
     api = Apirest(log)
     col = []
     dataOffName = []
-    tableProduct = "product"
-    for colDb, name in Glob.converDb['product']:
+    tableProd = "product"
+    tableCat = "categorie"
+    for colDb, name in Glob.converDb[tableProd]:
         if name is not None:
             dataOffName.append(name)
         col.append(colDb)
@@ -82,10 +83,16 @@ def data_create():
     log.info("Colonnes : %s\n"
              "Valeurs  : %s" % (colProduct, dataOffName))
 
-    nbLineBefore = db.select("count(*)", tableProduct)[0][0]
+    nbLineBefore = db.select("count(*)", tableProd)[0][0]
 
-    for categorie in Glob.converDb['categorie']:
-        idCategorie = db.insert("categorie", [categorie], "name", True)
+    for categorie in Glob.converDb[tableCat]:
+        condCat = " name=%s"
+        catId = db.select("id", tableCat, condCat, True, [categorie])
+        if len(catId) == 0:
+            idCategorie = db.insert(tableCat, [categorie], "name", True)
+        else:
+            idCategorie = catId[0][0]
+            log.info("*** Categorie '%s' existe avec l'ID : %s ***" % (categorie, idCategorie))
         results = api.get_request(categorie)
         for nbProduct in range(len(results) - 1):
             result = results[nbProduct]
@@ -97,15 +104,15 @@ def data_create():
             log.debug("Valeurs du produit : %s\n", valProduct)
 
             condition = " product_name=%s"
-            listId = db.select("id", tableProduct, condition, True, [result['product_name']])
+            listId = db.select("id", tableProd, condition, True, [result['product_name']])
             if len(listId) == 0:
-                idProduct = db.insert(tableProduct, valProduct, colProduct, True)
+                idProduct = db.insert(tableProd, valProduct, colProduct, True)
             else:
                 idProduct = listId[0][0]
                 log.info("*** Produit '%s' existe avec l'ID : %s ***" % (result['product_name'], idProduct))
             db.insert("assoc_product_categorie", [idProduct, idCategorie])
 
-    nbLineAfter = db.select("count(*)", tableProduct)[0][0]
+    nbLineAfter = db.select("count(*)", tableProd)[0][0]
     print("  - {} produits ajoutés\n"
           "\n## Insertion des données dans la base terminée ##\n".format(nbLineAfter - nbLineBefore))
 

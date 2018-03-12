@@ -9,10 +9,8 @@ import pickle
 import logging as log
 import argparse
 
-from random import randint
-
-from data.database import Database
-from data.glob import Glob
+from package.database import Database
+from package.glob import Glob
 
 
 def parse_arguments():
@@ -110,18 +108,25 @@ def substitute_products(product):
     condition = Glob.condAssocCat + " AND c.name=%s AND p.nutrition_grade=%s"
     subProducts = db.select(cols, Glob.tabAssocCat, condition, True, values)
 
-    nb = randint(0, len(subProducts) - 1)
+    nb = 0
     subBackup = [subProducts[nb][0], prodName]
     while 1:
         desc_product(subProducts[nb][1:], prodName)
         print("Listes des options:\n"
-              "  1 - Enregistrez cet aliment de substitution ?\n"
-              "  2 - Pour retournez au menu principale\n")
+              "  1 - Produit de substitution suivant\n"
+              "  2 - Enregistrez cet aliment de substitution ?\n"
+              "  3 - Pour retournez au menu principale\n")
         entry = input("Entrez le numéro de votre choix : ")
         if entry == "1":
+            if nb < (len(subProducts) - 1):
+                nb += 1
+            else:
+                input("\nAppuyez sur une touche pour revenir au premier produit de substitution... ")
+                nb = 0
+        if entry == "2":
             list_backup(subBackup)
             break
-        elif entry == "2":
+        elif entry == "3":
             break
 
 

@@ -4,7 +4,7 @@ API OpenfoodFacts management module
 
 import requests
 
-from data.glob import Glob
+from package.glob import Glob
 
 
 class Apirest:

@@ -12,8 +12,6 @@ class Glob:
     confDbFile = 'database_conf'
 
     # Constants for SQL requests
-    reqSelect = """SELECT %s FROM %s;"""
-    reqCondition = """SELECT %s FROM %s WHERE %s %s;"""
     tabAssocCat = "product AS p, assoc_product_categorie AS a, categorie AS c"
     condAssocCat = "p.id=a.product_id AND c.id=a.categorie_id"
     tabBackProd = "backup AS b, product AS p"
