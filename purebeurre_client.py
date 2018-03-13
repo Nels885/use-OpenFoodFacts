@@ -226,7 +226,7 @@ def main():
     print("\nListes des options:\n"
           "  1 - Quel aliment souhaitez-vous remplacer ?\n"
           "  2 - Retrouvez mes aliments substitués\n"
-          "  3 - Supprimez un aliments substitués\n")
+          "  3 - Supprimez mes aliments substitués\n")
     entry = input("Entrez le numéro de votre choix ( ou <Enter> pour quitter) : ")
     return entry
 

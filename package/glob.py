@@ -44,7 +44,8 @@ class Glob:
         'categorie': (
             'Boissons gazeuses', 'Boissons chaudes', 'Boissons non sucrées', 'Laits', 'Yaourts', 'Fromages',
             'Plats préparés', 'Céréales et pommes de terre', 'Biscuits et gateaux', 'Desserts', 'Confiseries',
-            'Légumes et dérivés'
+            'Légumes et dérivés', 'Epicerie', 'Poissons', 'Apéritif', 'Surgelés', 'Conserves', 'Petit-déjeuners',
+            'Sauces', 'Produit de la mer', 'Condiments', 'Plats à base de viande', 'Bonbons', 'Vins'
         ),
         'assoc_product_categorie': (
             'product_id',
