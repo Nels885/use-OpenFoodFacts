@@ -1,7 +1,7 @@
-CREATE SEQUENCE categorie_id_seq;
+CREATE SEQUENCE category_id_seq;
 
-CREATE TABLE categorie (
-                id INTEGER NOT NULL DEFAULT nextval('categorie_id_seq'),
+CREATE TABLE category (
+                id INTEGER NOT NULL DEFAULT nextval('category_id_seq'),
                 name TEXT NOT NULL,
                 PRIMARY KEY(id)
 );
@@ -12,7 +12,7 @@ CREATE SEQUENCE product_id_seq;
 CREATE TABLE product (
                 id INTEGER NOT NULL DEFAULT nextval('product_id_seq'),
                 product_name TEXT NOT NULL,
-                quantite TEXT,
+                quantity TEXT,
                 ingredient TEXT,
                 nutrition_grade TEXT,
                 url TEXT,
@@ -30,10 +30,10 @@ CREATE TABLE backup (
                 FOREIGN KEY(product_id) REFERENCES product(id)
 );
 
-CREATE TABLE assoc_product_categorie (
+CREATE TABLE assoc_product_category (
                 product_id INTEGER NOT NULL,
-                categorie_id INTEGER NOT NULL,
-                PRIMARY KEY(product_id,categorie_id),
+                category_id INTEGER NOT NULL,
+                PRIMARY KEY(product_id,category_id),
                 FOREIGN KEY(product_id) REFERENCES product(id),
-                FOREIGN KEY(categorie_id) REFERENCES categorie(id)
+                FOREIGN KEY(category_id) REFERENCES category(id)
 );

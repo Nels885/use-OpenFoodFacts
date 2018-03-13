@@ -26,7 +26,7 @@ def parse_arguments():
 
 def header():
     """
-    Header of the programm in the console
+    Header of the program in the console
     """
     os.system("clear")
     print("\n   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
@@ -42,9 +42,9 @@ def list_categories():
         :return: returns the number that the user has chosen
     """
 
-    # list of categories of the categorie table
+    # list of categories of the category table
     cols = "*"
-    tabCat = "categorie ORDER BY name"
+    tabCat = "category ORDER BY name"
     categories = db.select(cols, tabCat)
 
     while 1:
@@ -103,16 +103,15 @@ def substitute_products(product):
     values = [catName, prodGrade]
 
     # list of substitute products
-    cols = "p.id,p.product_name,p.quantite,p.ingredient,p.url,p.stores"
+    cols = "p.id,p.product_name,p.quantity,p.ingredient,p.url,p.stores"
     condition = Glob.condAssocCat + " AND c.name=%s AND p.nutrition_grade=%s"
     subProducts = db.select(cols, Glob.tabAssocCat, condition, True, values)
 
     nb = 0
-    subBackup = [subProducts[nb][0], prodName]
     while 1:
         desc_product(subProducts[nb][1:], prodName)
         print("Listes des options:\n"
-              "  1 - Produit de substitution suivant\n"
+              "  1 - Produit de substitution suivant...\n"
               "  2 - Enregistrez cet aliment de substitution ?\n"
               "  3 - Pour retournez au menu principale\n")
         entry = input("Entrez le numéro de votre choix : ")
@@ -123,6 +122,7 @@ def substitute_products(product):
                 input("\nAppuyez sur une touche pour revenir au premier produit de substitution... ")
                 nb = 0
         if entry == "2":
+            subBackup = [subProducts[nb][0], prodName]
             list_backup(subBackup)
             break
         elif entry == "3":
@@ -138,9 +138,9 @@ def desc_product(infoSub, subName):
     name, quantity, ingredients, url, stores = infoSub
     os.system("clear")
     print(
-        "\n##########################################################################\n\n"
-        "  Proposition produit de substitution pour '{}':\n"
-        "\n##########################################################################\n\n"
+        "\n   ##########################################################################\n\n"
+        "     Proposition produit de substitution pour '{}':\n"
+        "\n   ##########################################################################\n\n"
         " * Nom : {}\n"
         " * Quantité : {}\n"
         " * Ingredients : {}\n"
@@ -155,7 +155,7 @@ def list_backup(subBackup=None):
         :return: Displays in the console the list
     """
     if subBackup is None:
-        cols = "b.id,b.substituted_product,p.id,p.product_name,p.quantite,p.ingredient,p.url,p.stores"
+        cols = "b.id,b.substituted_product,p.id,p.product_name,p.quantity,p.ingredient,p.url,p.stores"
         condition = Glob.condBackProd
         backups = db.select(cols, Glob.tabBackProd, condition, True)
         while 1:
@@ -167,7 +167,7 @@ def list_backup(subBackup=None):
                 backId, subProd, prodId, ProdName = back[:4]
                 nb += 1
                 numbers.append(str(nb))
-                print("  {} - '{}' substitut de : '{}'".format(nb, subProd, ProdName))
+                print("  {} - '{}' substitut de : '{}'".format(nb, ProdName, subProd))
             selectId = input("\nEntrez le numéro de votre choix ou <Enter> pour le menu principal : ")
             if selectId == "":
                 break
@@ -187,7 +187,7 @@ def del_backup():
     """
     Displays the list of registered substitute products to be erased
     """
-    cols = "b.id,b.substituted_product,p.id,p.product_name,p.quantite,p.ingredient,p.url,p.stores"
+    cols = "b.id,b.substituted_product,p.id,p.product_name,p.quantity,p.ingredient,p.url,p.stores"
     condition = Glob.condBackProd
     backups = db.select(cols, Glob.tabBackProd, condition, True)
     while 1:

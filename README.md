@@ -18,7 +18,7 @@ Create a database and a proprietary user account for this database.
 
 Ubuntu example:
 
-    $ sudo -i -u prosgres
+    $ sudo -i -u postgres
     $ createuser -P --interactive <user_name>
     Enter password for new role:
     Enter if again:

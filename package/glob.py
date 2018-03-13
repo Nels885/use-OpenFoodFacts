@@ -12,8 +12,8 @@ class Glob:
     confDbFile = 'database_conf'
 
     # Constants for SQL requests
-    tabAssocCat = "product AS p, assoc_product_categorie AS a, categorie AS c"
-    condAssocCat = "p.id=a.product_id AND c.id=a.categorie_id"
+    tabAssocCat = "product AS p, assoc_product_category AS a, category AS c"
+    condAssocCat = "p.id=a.product_id AND c.id=a.category_id"
     tabBackProd = "backup AS b, product AS p"
     condBackProd = "b.product_id=p.id"
 
@@ -35,21 +35,21 @@ class Glob:
     converDb = {
         'product': [
             ('product_name', 'product_name'),
-            ('quantite', 'quantity'),
+            ('quantity', 'quantity'),
             ('ingredient', 'ingredients_text_with_allergens_fr'),
             ('nutrition_grade', 'nutrition_grades'),
             ('url', 'url'),
             ('stores', 'stores_tags')
         ],
-        'categorie': (
+        'category': (
             'Boissons gazeuses', 'Boissons chaudes', 'Boissons non sucrées', 'Laits', 'Yaourts', 'Fromages',
             'Plats préparés', 'Céréales et pommes de terre', 'Biscuits et gateaux', 'Desserts', 'Confiseries',
             'Légumes et dérivés', 'Epicerie', 'Poissons', 'Apéritif', 'Surgelés', 'Conserves', 'Petit-déjeuners',
             'Sauces', 'Produit de la mer', 'Condiments', 'Plats à base de viande', 'Bonbons', 'Vins'
         ),
-        'assoc_product_categorie': (
+        'assoc_product_category': (
             'product_id',
-            'categorie_id'
+            'category_id'
         ),
         'backup': (
             'id',

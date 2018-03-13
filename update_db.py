@@ -73,7 +73,7 @@ def data_create():
     col = []
     dataOffName = []
     tableProd = "product"
-    tableCat = "categorie"
+    tableCat = "category"
     for colDb, name in Glob.converDb[tableProd]:
         if name is not None:
             dataOffName.append(name)
@@ -84,22 +84,22 @@ def data_create():
 
     nbLineBefore = db.select("count(*)", tableProd)[0][0]
 
-    for categorie in Glob.converDb[tableCat]:
+    for category in Glob.converDb[tableCat]:
         condCat = " name=%s"
-        catId = db.select("id", tableCat, condCat, True, [categorie])
+        catId = db.select("id", tableCat, condCat, True, [category])
         if len(catId) == 0:
-            idCategorie = db.insert(tableCat, [categorie], "name", True)
+            idCategory = db.insert(tableCat, [category], "name", True)
         else:
-            idCategorie = catId[0][0]
-            log.info("*** Categorie '%s' existe avec l'ID : %s ***" % (categorie, idCategorie))
-        results = api.get_request(categorie)
+            idCategory = catId[0][0]
+            log.info("*** Categorie '%s' existe avec l'ID : %s ***" % (category, idCategory))
+        results = api.get_request(category)
         for nbProduct in range(len(results) - 1):
             result = results[nbProduct]
             valProduct = api.convert_data(result, dataOffName)
 
             # Product information with verbose option
             log.info("*** PRODUIT N°%s CATEGORIE : '%s' ***\n"
-                     "Product_name : %s\n", str(nbProduct + 1), categorie, result['product_name'])
+                     "Product_name : %s\n", str(nbProduct + 1), category, result['product_name'])
             log.debug("Valeurs du produit : %s\n", valProduct)
 
             condition = " product_name=%s"
@@ -109,7 +109,7 @@ def data_create():
             else:
                 idProduct = listId[0][0]
                 log.info("*** Produit '%s' existe avec l'ID : %s ***" % (result['product_name'], idProduct))
-            db.insert("assoc_product_categorie", [idProduct, idCategorie])
+            db.insert("assoc_product_category", [idProduct, idCategory])
 
     nbLineAfter = db.select("count(*)", tableProd)[0][0]
     print("  - {} produits ajoutés\n"
