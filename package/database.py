@@ -70,7 +70,7 @@ class Database:
             req = self.SELECT + ";"
             req = req % (columns, tables)
         self.log.debug("## %s ##", req)
-        self._execute(req, param)
+        self.execute(req, param)
         return self.__result()
 
     def sql_script(self, sqlFile):
@@ -79,7 +79,7 @@ class Database:
             :param sqlFile: file to execute
             :return: execute the different SQL requests in the file
         """
-        self._execute(open(sqlFile, 'r').read())
+        self.execute(open(sqlFile, 'r').read())
 
     def close(self):
         """
@@ -90,7 +90,7 @@ class Database:
             if self.conn:
                 self.conn.close()
 
-    def _execute(self, request, param=None):
+    def execute(self, request, param=None):
         """
         ## Execute the requests SQL ##
             :param request:
@@ -103,7 +103,7 @@ class Database:
             self.log.warning("*** La base de données existe déjà ***\n")
         except Exception as err:
             self.log.debug("### Requêtes SQL incorrecte : %s\n"
-                             "Erreur : %s ###" % (request, err))
+                           "Erreur : %s ###" % (request, err))
         self._commit()
 
     def _commit(self):
@@ -126,10 +126,10 @@ class Database:
         idLine = None
         if returnId:
             req = request[:-1] + self.RETURN_ID
-            self._execute(req, param)
+            self.execute(req, param)
             idLine = self.curs.fetchone()[0]
         else:
-            self._execute(request, param)
+            self.execute(request, param)
         return idLine
 
     def __result(self):

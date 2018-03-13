@@ -21,8 +21,7 @@ def parse_arguments():
     additional information
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("-v", "--verbose", action='store_true',
-                             help="""Display informations of use-OpenFoodFacts""")
+    parser.add_argument("-v", "--verbose", action='store_true', help="""Display informations of use-OpenFoodFacts""")
     parser.add_argument("-d", "--debug", action='store_true', help="""Switch to debug mode!""")
     return parser.parse_args()
 
@@ -58,8 +57,8 @@ def conf_database(msg=""):
     host = input("  - Adresse base de données ('localhost' par défaut) : ")
     if host == "":
         host = "localhost"
-    confDb = {'dbname': dbname, 'user': user, 'password': password, 'port': port, 'host': host}
-    pickle.dump(confDb, open(Glob.confDbFile, 'wb'))
+    confDatabase = {'dbname': dbname, 'user': user, 'password': password, 'port': port, 'host': host}
+    pickle.dump(confDatabase, open(Glob.confDbFile, 'wb'))
 
     print("\n## Ajout paramètres de la base de données terminée ##\n")
 
@@ -174,4 +173,3 @@ if __name__ == '__main__':
             break
         else:
             db.close()
-

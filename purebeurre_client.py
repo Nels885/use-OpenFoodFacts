@@ -19,8 +19,7 @@ def parse_arguments():
     additional information
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("-v", "--verbose", action='store_true',
-                             help="""Display informations of use-OpenFoodFacts""")
+    parser.add_argument("-v", "--verbose", action='store_true', help="""Display informations of use-OpenFoodFacts""")
     parser.add_argument("-d", "--debug", action='store_true', help="""Switch to debug mode!""")
     return parser.parse_args()
 
@@ -131,6 +130,11 @@ def substitute_products(product):
 
 
 def desc_product(infoSub, subName):
+    """
+    Display different values of a product
+        :param infoSub: Tuple of substitute product values
+        :param subName: Name of the substituted product
+    """
     name, quantity, ingredients, url, stores = infoSub
     os.system("clear")
     print(
@@ -141,23 +145,29 @@ def desc_product(infoSub, subName):
         " * Quantité : {}\n"
         " * Ingredients : {}\n"
         " * URL OpenFoodfacts : {}\n"
-        " * Magasins : {}\n"
-        .format(subName, name, quantity, ingredients, url, stores)
-    )
+        " * Magasins : {}\n".format(subName, name, quantity, ingredients, url, stores))
 
 
 def list_backup(subBackup=None):
+    """
+    Displays the list of registered substitute products
+        :param subBackup: Tuple of the list substitute products of the backup table
+        :return: Displays in the console the list
+    """
     if subBackup is None:
         cols = "b.id,b.substituted_product,p.id,p.product_name,p.quantite,p.ingredient,p.url,p.stores"
         condition = Glob.condBackProd
         backups = db.select(cols, Glob.tabBackProd, condition, True)
         while 1:
             header()
+            nb = 0
             numbers = []
             print("\nListes des produits substitués :")
             for back in backups:
-                numbers.append(str(back[0]))
-                print("  {} - '{}' substitut de : '{}'".format(back[0], back[3], back[1]))
+                backId, subProd, prodId, ProdName = back[:4]
+                nb += 1
+                numbers.append(str(nb))
+                print("  {} - '{}' substitut de : '{}'".format(nb, subProd, ProdName))
             selectId = input("\nEntrez le numéro de votre choix ou <Enter> pour le menu principal : ")
             if selectId == "":
                 break
@@ -174,6 +184,9 @@ def list_backup(subBackup=None):
 
 
 def del_backup():
+    """
+    Displays the list of registered substitute products to be erased
+    """
     cols = "b.id,b.substituted_product,p.id,p.product_name,p.quantite,p.ingredient,p.url,p.stores"
     condition = Glob.condBackProd
     backups = db.select(cols, Glob.tabBackProd, condition, True)
@@ -182,8 +195,9 @@ def del_backup():
         numbers = []
         print("\nListes des produits substitués :")
         for back in backups:
-            numbers.append(str(back[0]))
-            print("  {} - '{}' substitut de : '{}'".format(back[0], back[3], back[1]))
+            backId, subProd, prodId, ProdName = back[:4]
+            numbers.append(str(backId))
+            print("  {} - '{}' substitut de : '{}'".format(backId, subProd, ProdName))
         print("\nListes des options:\n"
               "  - Choisir le numéro du produit à retirer\n"
               "  - Taper 'all' pour retirer tout les produits\n"
@@ -191,10 +205,15 @@ def del_backup():
         selectId = input("Entrez votre choix : ")
         if selectId == "":
             break
-        elif selectId == "all":
-            cmd = "DELETE FROM backup; SELECT setval('backup_id_seq',1, false);"
-            db._execute(cmd)
-            print("\n## Tout les produits enregistrés sont retirés de la base ##\n")
+        else:
+            if selectId in numbers:
+                cmd = "DELETE FROM backup WHERE id=%s;"
+                db.execute(cmd, [selectId])
+                print("\n## Le produit N°%s a été retiré ##\n" % selectId)
+            elif selectId == "all":
+                cmd = "DELETE FROM backup; SELECT setval('backup_id_seq',1, false);"
+                db.execute(cmd)
+                print("\n## Tout les produits enregistrés sont retirés de la base ##\n")
             input("Appuyez sur une touche pour revenir au menu principal... ")
             break
 
