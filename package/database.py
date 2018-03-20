@@ -93,8 +93,8 @@ class Database:
     def execute(self, request, param=None):
         """
         ## Execute the requests SQL ##
-            :param request:
-            :param param:
+            :param request: SQL request
+            :param param: parameter for the request
             :return: commit() method
         """
         try:

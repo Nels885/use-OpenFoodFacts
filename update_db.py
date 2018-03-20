@@ -44,6 +44,7 @@ def conf_database(msg=""):
     """
     Adding the parameters in the 'database_conf' file that
     allow you to connect to the database
+        :param msg: Show the menu name or detected errors
         :return: dict of the parameters of the database
     """
     header(msg)
@@ -124,9 +125,9 @@ def main():
     header()
     print("Listes des options:\n"
           "  1 - Paramètres base de données\n"
-          "  2 - Creation base de données\n"
-          "  3 - Effacez la base de données\n"
-          "  4 - Insérez données dans la base de données\n")
+          "  2 - Creation des tables de la base de données\n"
+          "  3 - Effacez toutes les données\n"
+          "  4 - Insérez les données dans la base de données\n")
     entry = input("Entrez le numéro de votre choix (ou <Enter> pour quitter) : ")
     return entry
 
@@ -154,10 +155,10 @@ if __name__ == '__main__':
                     header("## Creation de la base de données ##\n")
                     db.sql_script('script_create_DB.sql')
                 elif choice == "3":
-                    header("## Suppression des données dans la base ##\n")
+                    header("## Suppression des données dans la base de données ##\n")
                     db.sql_script('script_erase_DB.sql')
                 elif choice == "4":
-                    header("# Insertion des données dans la base en cours... #\n")
+                    header("# Insertion des données dans la base de données en cours... #\n")
                     data_create()
                 else:
                     print("\n*** Erreur de touche ***\n")
@@ -169,7 +170,7 @@ if __name__ == '__main__':
             conf_database()
             continue
         except KeyboardInterrupt:
-            log.warning("Fermeture du programme avec Ctrl+C")
+            log.warning("Fermeture du programme avec <Ctrl+C>")
             break
         else:
             db.close()

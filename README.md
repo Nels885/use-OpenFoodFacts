@@ -67,7 +67,7 @@ This one will ask you two different questions in French which are:
 
     1 - Quel aliment souhaitez-vous remplacer ? 
     2 - Retrouvez mes aliments substitués.
-    3 - Supprimez un aliments substitués.
+    3 - Supprimez mes aliments substitués.
 
 - Select one with the numeric keypad and confirm with the **enter** key.
 - Then it will offer you several choices of categories, select in one thanks to the corresponding numeric key and validate.

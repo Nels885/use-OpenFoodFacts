@@ -113,7 +113,7 @@ def substitute_products(product):
         print("Listes des options:\n"
               "  1 - Produit de substitution suivant...\n"
               "  2 - Enregistrez cet aliment de substitution ?\n"
-              "  3 - Pour retournez au menu principale\n")
+              "  3 - Pour retournez au menu principal\n")
         entry = input("Entrez le numéro de votre choix : ")
         if entry == "1":
             if nb < (len(subProducts) - 1):
@@ -262,6 +262,6 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         log.warning("Fermeture du programme avec Ctrl+C")
     except FileNotFoundError:
-        log.error("Manque fichier 'database_conf' voyez lancer le script 'update_db.py'")
+        log.error("Manque fichier 'database_conf', lancez le script 'update_db.py' pour créer ce fichier.")
     else:
         db.close()
